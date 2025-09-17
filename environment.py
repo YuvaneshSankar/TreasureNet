@@ -27,6 +27,7 @@ class GridWorldEnvironment:
         self.steps_taken = 0
         self.done = False
         
+        
     def _create_obstacles(self):
         """Create a few obstacles to make it more interesting"""
         obstacles = set()
