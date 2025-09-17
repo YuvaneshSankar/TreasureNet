@@ -26,6 +26,7 @@ class GridWorldEnvironment:
         self.current_pos = None
         self.steps_taken = 0
         self.done = False
+
         
         
     def _create_obstacles(self):
