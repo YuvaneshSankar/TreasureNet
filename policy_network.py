@@ -109,4 +109,4 @@ if __name__ == "__main__":
         else:
             print(f"  {name}: No gradient")
     
-    print("\n✅ All tests passed! Policy network is ready.")
+    print("\n All tests passed! Policy network is ready.")
