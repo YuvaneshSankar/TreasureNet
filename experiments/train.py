@@ -5,28 +5,32 @@ import sys
 import os
 
 # Add src directory to path so we can import our modules
-sys.path.append('src')
+sys.path.append('../src')
 
 from policy_network import PolicyNetwork
 from environment import GridWorldEnvironment
-from reinfroce_agent import ReinforceAgent
+from reinforce_agent import ReinforceAgent
+
+# Import configuration
+sys.path.append('..')
+import config
 
 # Set random seeds for reproducibility (meaning everytime we get almost similar initial weights)
-torch.manual_seed(42)  # Fix PyTorch random numbers
-np.random.seed(42)     # Fix NumPy random numbers
+torch.manual_seed(config.PYTORCH_SEED)  # Fix PyTorch random numbers
+np.random.seed(config.NUMPY_SEED)       # Fix NumPy random numbers
 
 def main():
     # ================================
-    # HYPERPARAMETERS
+    # HYPERPARAMETERS FROM CONFIG
     # ================================
-    NUM_EPISODES = 1000          # Total training episodes
-    GAMMA = 0.95                 # Discount factor for future rewards
-    LEARNING_RATE = 0.001        # Neural network learning rate
-    GRID_SIZE = 5                # Size of the grid world (5x5)
-    MAX_STEPS = 50               # Maximum steps per episode
-    PRINT_EVERY = 100            # Print progress every N episodes
-    PLOT_EVERY = 200             # Plot training curves every N episodes
-    TEST_EVERY = 200             # Test agent performance every N episodes
+    NUM_EPISODES = config.NUM_EPISODES
+    GAMMA = config.GAMMA
+    LEARNING_RATE = config.LEARNING_RATE
+    GRID_SIZE = config.GRID_SIZE
+    MAX_STEPS = config.MAX_STEPS
+    PRINT_EVERY = config.PRINT_EVERY
+    PLOT_EVERY = config.PLOT_EVERY
+    TEST_EVERY = config.TEST_EVERY
     
     print("🚀 Starting REINFORCE Training for Grid World Treasure Hunt")
     print(f"Grid Size: {GRID_SIZE}x{GRID_SIZE}")
@@ -48,12 +52,12 @@ def main():
     
     # Create the policy network (2 inputs for x,y coordinates, 4 outputs for actions)
     policy_net = PolicyNetwork(
-        input_size=2,           # x, y coordinates
-        hidden_size=64,         # Hidden layer size
-        output_size=4,          # 4 actions: up, down, left, right
+        input_size=config.INPUT_SIZE,
+        hidden_size=config.HIDDEN_SIZE,
+        output_size=config.OUTPUT_SIZE,
         learning_rate=LEARNING_RATE
     )
-    print(f"Policy network created: 2 -> 64 -> 64 -> 4")
+    print(f"Policy network created: {config.INPUT_SIZE} -> {config.HIDDEN_SIZE} -> {config.HIDDEN_SIZE} -> {config.OUTPUT_SIZE}")
     
     # Create the REINFORCE agent
     agent = ReinforceAgent(gamma=GAMMA)
@@ -121,6 +125,10 @@ def main():
         # STEP 8: Test agent performance periodically
         if episode % TEST_EVERY == 0:
             test_agent_performance(env, policy_net, episode)
+        
+        # STEP 9: Save model periodically
+        if episode % config.SAVE_INTERVAL == 0 or episode == NUM_EPISODES:
+            save_model_checkpoint(policy_net, episode, np.mean(episode_rewards[-100:]) if len(episode_rewards) >= 100 else np.mean(episode_rewards))
     
     # ================================
     # TRAINING COMPLETED
@@ -150,6 +158,28 @@ def main():
     test_agent_performance(env, policy_net, NUM_EPISODES, num_test_episodes=10, render=True)
     
     return policy_net, episode_rewards, episode_lengths, success_episodes
+
+def save_model_checkpoint(policy_net, episode, avg_reward):
+    """Save model checkpoint"""
+    if not os.path.exists(config.SAVE_DIR):
+        os.makedirs(config.SAVE_DIR)
+    
+    # Save best model
+    filename = f"{config.MODEL_NAME_PREFIX}_ep{episode}_reward{avg_reward:.1f}.pth"
+    filepath = os.path.join(config.SAVE_DIR, filename)
+    
+    torch.save({
+        'model_state_dict': policy_net.state_dict(),
+        'episode': episode,
+        'avg_reward': avg_reward,
+        'config': {
+            'input_size': config.INPUT_SIZE,
+            'hidden_size': config.HIDDEN_SIZE,
+            'output_size': config.OUTPUT_SIZE,
+            'learning_rate': config.LEARNING_RATE
+        }
+    }, filepath)
+    print(f"Model saved: {filepath}")
 
 def plot_training_progress(rewards, lengths, episode):
     """Plot training progress during training"""

@@ -7,17 +7,21 @@ import time
 from collections import defaultdict
 
 # Add src directory to path so we can import our modules
-sys.path.append('src')
+sys.path.append('../src')
 
 from policy_network import PolicyNetwork
 from environment import GridWorldEnvironment
-from reinfroce_agent import ReinforceAgent
+from reinforce_agent import ReinforceAgent
+
+# Import configuration
+sys.path.append('..')
+import config
 
 def load_trained_model(model_path, input_size=2, hidden_size=64, output_size=4):
     """Load a trained policy network from saved checkpoint"""
     print(f"Loading trained model from: {model_path}")
     
-    # Create policy network with same architecture
+    # Load trained model
     policy_net = PolicyNetwork(
         input_size=input_size,
         hidden_size=hidden_size, 

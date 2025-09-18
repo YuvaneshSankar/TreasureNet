@@ -3,6 +3,8 @@ Configuration file for REINFORCE Grid World Training
 Contains all hyperparameters and settings in one centralized location
 """
 
+import torch
+
 # ================================
 # TRAINING HYPERPARAMETERS
 # ================================
