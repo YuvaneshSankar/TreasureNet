@@ -24,6 +24,8 @@ class ReinforceAgent:
         discounted_rewards = []
         G = 0
         
+
+
         for reward in reversed(self.rewards):
             G = reward + self.gamma * G
             discounted_rewards.insert(0, G)
