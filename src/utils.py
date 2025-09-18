@@ -160,6 +160,8 @@ def log_episode(log_file, episode, reward, length, loss):
 # Test the utils functions
 if __name__ == "__main__":
     print("Testing utility functions...")
+
+    
     
     # Test plotting with dummy data
     dummy_rewards = [i + np.random.randn() for i in range(100)]
